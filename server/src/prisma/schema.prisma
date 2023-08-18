@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("PRM_DB_URL")
+}
+
+model users {
+  id           Int      @id @unique(map: "Users_id_key") @default(autoincrement())
+  email        String   @unique(map: "Users_email_key") @db.Char(100)
+  emailconfirm Boolean  @default(false)
+  username     String   @unique @db.Char(30)
+  firstname    String   @db.Char(30)
+  lastname     String   @db.Char(30)
+  password     String   @db.Char(255)
+  blocked      Boolean  @default(false)
+  avatar       String   @default("http://127.0.0.1:4000/no_avatar.jpg")
+  create_at    DateTime @default(now())
+  update_at    DateTime @default(now())
+  cart         cart[]
+}
+
+model category {
+  id       Int       @id @unique @default(autoincrement())
+  sex      String    @db.Char(255)
+  name     String    @db.Char(255)
+  products product[]
+}
+
+model product {
+  id          Int      @id @unique @default(autoincrement())
+  title       String   @db.Char(255)
+  image       String   @db.LongText
+  img1        String   @db.LongText
+  img2        String   @db.LongText
+  img3        String   @db.LongText
+  img4        String   @db.LongText
+  price       Int
+  actualPrice Int
+  categoryId  Int
+  delete      String?  @default("0") @db.Char(100)
+  cart        cart[]
+  category    category @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId], map: "product_categoryId_fkey")
+}
+
+model cart {
+  id        Int     @id @unique @default(autoincrement())
+  userId    Int
+  productId Int
+  quantity  Int     @default(0)
+  product   product @relation(fields: [productId], references: [id])
+  userId1   users   @relation(fields: [userId], references: [id])
+
+  @@index([productId], map: "cart_productId_fkey")
+  @@index([userId], map: "cart_userId_fkey")
+}
